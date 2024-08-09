@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.shareit.user.dto.UserDto;
 
 @Slf4j
 @RestController
@@ -17,21 +18,21 @@ public class UserController {
     }
 
     @PostMapping
-    public User createUser(@Valid @RequestBody User user) {
-        log.info("Creating user: {}", user);
-        return userService.createUser(user);
+    public UserDto createUser(@Valid @RequestBody UserDto userDto) {
+        log.info("Creating user: {}", userDto);
+        return userService.createUser(userDto);
     }
 
     @GetMapping("/{id}")
-    public User getUser(@PathVariable Long id) {
+    public UserDto getUser(@PathVariable Long id) {
         log.info("Retrieving user with id: {}", id);
         return userService.getUserById(id);
     }
 
     @PatchMapping("/{id}")
-    public User updateUser(@PathVariable Long id, @RequestBody User user) {
-        log.info("Updating user: {}", user);
-        return userService.updateUser(id, user);
+    public UserDto updateUser(@PathVariable Long id, @RequestBody UserDto userDto) {
+        log.info("Updating user: {}", userDto);
+        return userService.updateUser(id, userDto);
     }
 
     @DeleteMapping("/{id}")

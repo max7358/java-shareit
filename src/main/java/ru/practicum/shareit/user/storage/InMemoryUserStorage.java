@@ -5,19 +5,16 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.practicum.shareit.exception.ConflictException;
 import ru.practicum.shareit.exception.NotFoundException;
-import ru.practicum.shareit.user.User;
+import ru.practicum.shareit.user.model.User;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Slf4j
 @Component
 public class InMemoryUserStorage implements UserStorage {
 
     @Getter
-    private final HashMap<Long, User> users = new HashMap<>();
+    private final Map<Long, User> users = new HashMap<>();
     private Long id = 1L;
 
     @Override
@@ -50,7 +47,7 @@ public class InMemoryUserStorage implements UserStorage {
                 userToUpdate.setName(user.getName());
             }
             users.put(id, userToUpdate);
-            log.debug("User updated: {}", user);
+            log.debug("User updated: {}", userToUpdate);
             return userToUpdate;
         } else {
             throw new NotFoundException("User with id:" + user.getId() + " not found");

@@ -1,4 +1,4 @@
-package ru.practicum.shareit.booking.dto;
+package ru.practicum.shareit.booking.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -10,7 +10,7 @@ import java.time.ZonedDateTime;
 
 @Data
 @AllArgsConstructor
-public class BookingDto {
+public class Booking {
     private Long id;
     private ZonedDateTime start;
     private ZonedDateTime end;
