@@ -3,6 +3,7 @@ package ru.practicum.shareit.item.storage;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import ru.practicum.shareit.exception.BadRequestException;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.model.Item;
 
@@ -29,10 +30,18 @@ public class InMemoryItemStorage implements ItemStorage {
         if (items.containsKey(id)) {
             Item itemToUpdate = items.get(id);
             if (item.getName() != null) {
-                itemToUpdate.setName(item.getName());
+                if (!itemToUpdate.getName().isEmpty()) {
+                    itemToUpdate.setName(item.getName());
+                } else {
+                    throw new BadRequestException("Name cannot be empty");
+                }
             }
             if (item.getDescription() != null) {
-                itemToUpdate.setDescription(item.getDescription());
+                if (!item.getDescription().isEmpty()) {
+                    itemToUpdate.setDescription(item.getDescription());
+                } else {
+                    throw new BadRequestException("Description cannot be empty");
+                }
             }
             if (item.getAvailable() != null) {
                 itemToUpdate.setAvailable(item.getAvailable());

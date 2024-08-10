@@ -1,6 +1,5 @@
 package ru.practicum.shareit.exception;
 
-import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingRequestHeaderException;
@@ -29,9 +28,8 @@ public class ErrorHandler {
     @ExceptionHandler({MethodArgumentNotValidException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public List<String> handleArgumentNotValidException(final MethodArgumentNotValidException ex) {
-        return ex.getBindingResult().getAllErrors().stream()
-                .map(DefaultMessageSourceResolvable::getDefaultMessage)
-                .toList();
+        return ex.getBindingResult().getFieldErrors().stream().map(fe -> "Validation error: " + fe.getDefaultMessage() +
+                " -> field: " + fe.getField()).toList();
     }
 
     @ExceptionHandler({MissingRequestHeaderException.class})
