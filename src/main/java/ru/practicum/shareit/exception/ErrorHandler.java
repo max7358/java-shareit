@@ -43,4 +43,10 @@ public class ErrorHandler {
     public Map<String, String> handleBadRequestException(final RuntimeException e) {
         return Map.of("error", e.getMessage());
     }
+
+    @ExceptionHandler({ForbiddenException.class})
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public Map<String, String> handleForbiddenException(final RuntimeException e) {
+        return Map.of("error", e.getMessage());
+    }
 }
