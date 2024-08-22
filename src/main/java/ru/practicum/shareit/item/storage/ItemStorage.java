@@ -5,6 +5,7 @@ import ru.practicum.shareit.item.model.Item;
 
 import java.util.List;
 
+@Deprecated
 public interface ItemStorage extends CommonStorage<Item> {
     List<Item> findAll(Long userId);
 

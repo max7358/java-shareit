@@ -11,6 +11,7 @@ import java.util.*;
 
 @Slf4j
 @Component
+@Deprecated
 public class InMemoryUserStorage implements UserStorage {
 
     @Getter
