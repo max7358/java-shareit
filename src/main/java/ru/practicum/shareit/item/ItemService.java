@@ -3,8 +3,11 @@ package ru.practicum.shareit.item;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.booking.storage.BookingRepository;
 import ru.practicum.shareit.exception.BadRequestException;
 import ru.practicum.shareit.exception.NotFoundException;
+import ru.practicum.shareit.item.dto.ItemDatesDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.mapper.ItemMapper;
 import ru.practicum.shareit.item.model.Item;
@@ -12,7 +15,12 @@ import ru.practicum.shareit.item.storage.ItemRepository;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.storage.UserRepository;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import static java.util.Comparator.comparing;
 
 @Service
 @Transactional(readOnly = true)
@@ -20,11 +28,13 @@ public class ItemService {
 
     private final ItemRepository itemRepository;
     private final UserRepository userRepository;
+    private final BookingRepository bookingRepository;
 
     @Autowired
-    public ItemService(ItemRepository itemRepository, UserRepository userRepository) {
+    public ItemService(ItemRepository itemRepository, UserRepository userRepository, BookingRepository bookingRepository) {
         this.itemRepository = itemRepository;
         this.userRepository = userRepository;
+        this.bookingRepository = bookingRepository;
     }
 
     @Transactional
@@ -66,9 +76,36 @@ public class ItemService {
         return ItemMapper.toItemDto(itemRepository.findById(id).orElseThrow(() -> new NotFoundException("Item with id:" + id + " not found")));
     }
 
-    public List<ItemDto> getItems(Long userId) {
-        userRepository.findById(userId).orElseThrow(() -> new NotFoundException("User with id:" + userId + " not found"));
-        return itemRepository.findAllByOwnerId(userId).stream().map(ItemMapper::toItemDto).toList();
+    public List<ItemDatesDto> getItems(Long userId) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new NotFoundException("User with id:" + userId + " not found"));
+        Map<Long, List<Booking>> bookingsMap = bookingRepository.findBookingsByItemOwnerOrderByStartDesc(user)
+                .stream()
+                .collect(Collectors.groupingBy((Booking booking) -> booking.getItem().getId()));
+        List<ItemDatesDto> list = itemRepository.findAllByOwnerId(userId).stream()
+                .map(item -> ItemMapper.toItemDatesDto(item, findLast(bookingsMap.get(item.getId())), findNext(bookingsMap.get(item.getId())))).toList();
+        return list;
+    }
+
+    private Booking findLast(List<Booking> booking) {
+        if (booking == null) {
+            return null;
+        } else {
+            return booking.stream()
+                    .filter(bk -> bk.getEnd().isBefore(LocalDateTime.now()))
+                    .max(comparing(Booking::getEnd))
+                    .orElse(null);
+        }
+    }
+
+    private Booking findNext(List<Booking> booking) {
+        if (booking == null) {
+            return null;
+        } else {
+            return booking.stream()
+                    .filter(bk -> bk.getStart().isAfter(LocalDateTime.now()))
+                    .min(comparing(Booking::getEnd))
+                    .orElse(null);
+        }
     }
 
     public List<ItemDto> findItems(String text) {

@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.shareit.item.dto.ItemDatesDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 
 import java.util.List;
@@ -39,7 +40,7 @@ public class ItemController {
     }
 
     @GetMapping
-    public List<ItemDto> getItems(@RequestHeader("X-Sharer-User-Id") Long userId) {
+    public List<ItemDatesDto> getItems(@RequestHeader("X-Sharer-User-Id") Long userId) {
         log.info("Retrieving items");
         return itemService.getItems(userId);
 
