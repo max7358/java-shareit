@@ -1,6 +1,8 @@
 package ru.practicum.shareit.booking;
 
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingSaveDto;
 import ru.practicum.shareit.booking.enm.BookingState;
@@ -24,17 +26,19 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@Transactional(readOnly = true)
 public class BookingService {
     BookingRepository repository;
     UserService userService;
     ItemService itemService;
 
-    public BookingService(BookingRepository repository, UserService userService, ItemService itemService) {
+    public BookingService(BookingRepository repository, UserService userService, @Lazy ItemService itemService) {
         this.repository = repository;
         this.userService = userService;
         this.itemService = itemService;
     }
 
+    @Transactional
     public BookingDto createBooking(Long userId, BookingSaveDto bookingSaveDto) {
         UserDto userDto = userService.getUserById(userId);
         ItemDto itemDto = itemService.getItem(bookingSaveDto.getItemId());
@@ -68,6 +72,7 @@ public class BookingService {
                 .orElseThrow(() -> new NotFoundException("Booking with id:" + bookingId + " not found"));
     }
 
+    @Transactional
     public BookingDto approveBooking(Long userId, Long bookingId, Boolean approved) {
         Booking booking = getBooking(bookingId);
         if (!userId.equals(booking.getItem().getOwner().getId())) {
@@ -130,5 +135,10 @@ public class BookingService {
             default:
                 throw new BadRequestException("Unknown state");
         }
+    }
+
+    public List<BookingDto> getBookingsByUserAndItem(Long userId, Long itemId) {
+        return repository.findByBooker_IdAndItem_IdAndStatusAndEndIsBefore(userId, itemId, BookingStatus.APPROVED, LocalDateTime.now())
+                .stream().map(BookingMapper::toBookingDto).toList();
     }
 }

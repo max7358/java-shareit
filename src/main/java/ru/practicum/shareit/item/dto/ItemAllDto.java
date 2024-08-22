@@ -7,16 +7,21 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import ru.practicum.shareit.booking.dto.BookingDto;
 
+import java.util.List;
+
 @Data
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
-public class ItemDatesDto extends ItemDto {
+public class ItemAllDto extends ItemDto {
     private BookingDto lastBooking;
     private BookingDto nextBooking;
+    private List<CommentDto> comments;
 
-    public ItemDatesDto(Long id, @NotEmpty String name, @NotEmpty String description, @NotNull Boolean available, Long request, BookingDto lastBooking, BookingDto nextBooking) {
+    public ItemAllDto(Long id, @NotEmpty String name, @NotEmpty String description, @NotNull Boolean available,
+                      Long request, BookingDto lastBooking, BookingDto nextBooking, List<CommentDto> comments) {
         super(id, name, description, available, request);
         this.lastBooking = lastBooking;
         this.nextBooking = nextBooking;
+        this.comments = comments;
     }
 }
