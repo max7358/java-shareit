@@ -6,7 +6,7 @@ import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.user.model.User;
 
 @Entity
-@Table(name = "items", schema = "public")
+@Table(name = "items")
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder

@@ -7,7 +7,7 @@ import ru.practicum.shareit.user.model.User;
 import java.time.ZonedDateTime;
 
 @Entity
-@Table(name = "requests", schema = "public")
+@Table(name = "requests")
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
