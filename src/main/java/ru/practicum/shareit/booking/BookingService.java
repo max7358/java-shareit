@@ -41,7 +41,7 @@ public class BookingService {
     @Transactional
     public BookingDto createBooking(Long userId, BookingSaveDto bookingSaveDto) {
         UserDto userDto = userService.getUserById(userId);
-        ItemDto itemDto = itemService.getItem(bookingSaveDto.getItemId());
+        ItemDto itemDto = itemService.getItem(bookingSaveDto.getItemId(), userId);
         if (bookingSaveDto.getStart().isEqual(bookingSaveDto.getEnd())) {
             throw new BadRequestException("Start and end are equal");
         }
@@ -140,5 +140,9 @@ public class BookingService {
     public List<BookingDto> getBookingsByUserAndItem(Long userId, Long itemId) {
         return repository.findByBooker_IdAndItem_IdAndStatusAndEndIsBefore(userId, itemId, BookingStatus.APPROVED, LocalDateTime.now())
                 .stream().map(BookingMapper::toBookingDto).toList();
+    }
+
+    public List<BookingDto> getBookingsByItem(Long itemId) {
+        return repository.findByItem_Id(itemId).stream().map(BookingMapper::toBookingDto).toList();
     }
 }

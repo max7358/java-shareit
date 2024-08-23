@@ -83,9 +83,17 @@ public class ItemService {
         return ItemMapper.toItemDto(item);
     }
 
-    public ItemAllDto getItem(Long id) {
+    public ItemAllDto getItem(Long id, Long userId) {
+        Item item = itemRepository.findById(id).orElseThrow(() -> new NotFoundException("Item with id:" + id + " not found"));
+        BookingDto lastBooking = null;
+        BookingDto nextBooking = null;
+        if (item.getOwner().getId().equals(userId)) {
+            List<BookingDto> bookings = bookingService.getBookingsByItem(item.getId());
+            lastBooking = findLast(bookings);
+            nextBooking = findNext(bookings);
+        }
         return ItemMapper.toItemAllDto(itemRepository.findById(id).orElseThrow(() -> new NotFoundException("Item with id:" + id + " not found")),
-                null, null, findComments(id));
+                lastBooking, nextBooking, findComments(id));
     }
 
     public List<ItemAllDto> getItems(Long userId) {
@@ -135,7 +143,7 @@ public class ItemService {
 
     @Transactional
     public CommentDto addComment(Long userId, Long itemId, CommentSaveDto commentDto) {
-        ItemDto item = getItem(itemId);
+        ItemDto item = getItem(itemId, userId);
         UserDto user = userService.getUserById(userId);
         List<BookingDto> bookings = bookingService.getBookingsByUserAndItem(userId, itemId);
         if (!bookings.isEmpty()) {
