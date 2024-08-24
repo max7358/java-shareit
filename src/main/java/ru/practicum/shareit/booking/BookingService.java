@@ -107,7 +107,7 @@ public class BookingService {
                 return repository.findByBooker_IdAndStatusOrderByStartDesc(userId, BookingStatus.REJECTED)
                         .stream().map(BookingMapper::toBookingDto).toList();
             default:
-                throw new BadRequestException("Unknown state");
+                throw new BadRequestException("Booking status: " + state + " unsupported!");
         }
     }
 
@@ -133,7 +133,7 @@ public class BookingService {
                 return repository.findBookingsByItemOwnerAndStatusOrderByStartDesc(user, BookingStatus.REJECTED)
                         .stream().map(BookingMapper::toBookingDto).toList();
             default:
-                throw new BadRequestException("Unknown state");
+                throw new BadRequestException("Booking status: " + state + " unsupported!");
         }
     }
 
