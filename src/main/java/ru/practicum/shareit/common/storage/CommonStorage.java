@@ -2,6 +2,7 @@ package ru.practicum.shareit.common.storage;
 
 import java.util.List;
 
+@Deprecated
 public interface CommonStorage<T> {
     T create(T t);
 

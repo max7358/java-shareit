@@ -9,6 +9,7 @@ import ru.practicum.shareit.item.model.Item;
 
 import java.util.*;
 
+@Deprecated
 @Slf4j
 @Component
 public class InMemoryItemStorage implements ItemStorage {
