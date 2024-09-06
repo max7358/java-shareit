@@ -16,8 +16,8 @@ public class ItemAllDto extends ItemDto {
     private List<CommentDto> comments;
 
     public ItemAllDto(Long id, String name, String description, Boolean available,
-                      Long request, BookingDto lastBooking, BookingDto nextBooking, List<CommentDto> comments) {
-        super(id, name, description, available, request);
+                      Long requestId, BookingDto lastBooking, BookingDto nextBooking, List<CommentDto> comments) {
+        super(id, name, description, available, requestId);
         this.lastBooking = lastBooking;
         this.nextBooking = nextBooking;
         this.comments = comments;

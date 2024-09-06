@@ -10,8 +10,6 @@ import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.item.dto.CommentSaveDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 
-import java.util.List;
-
 @Controller
 @RequestMapping(path = "/items")
 @RequiredArgsConstructor
@@ -28,14 +26,14 @@ public class ItemController {
 
     @PostMapping("/{itemId}/comment")
     public ResponseEntity<Object> addComment(@RequestHeader("X-Sharer-User-Id") Long userId,
-                                 @PathVariable Long itemId, @Valid @RequestBody CommentSaveDto commentDto) {
+                                             @PathVariable Long itemId, @Valid @RequestBody CommentSaveDto commentDto) {
         log.info("Adding comment: {}, userId={}", commentDto, userId);
         return itemClient.addComment(userId, itemId, commentDto);
     }
 
     @PatchMapping("/{itemId}")
     public ResponseEntity<Object> updateItem(@RequestHeader("X-Sharer-User-Id") Long userId, @PathVariable Long itemId,
-                              @RequestBody ItemDto itemDto) {
+                                             @RequestBody ItemDto itemDto) {
         log.info("Updating item: {}", itemDto);
         return itemClient.updateItem(userId, itemId, itemDto);
     }

@@ -18,6 +18,9 @@ import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.storage.CommentRepository;
 import ru.practicum.shareit.item.storage.ItemRepository;
+import ru.practicum.shareit.request.ItemRequestService;
+import ru.practicum.shareit.request.mapper.ItemRequestMapper;
+import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.user.UserService;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.mapper.UserMapper;
@@ -38,21 +41,28 @@ public class ItemService {
     private final UserService userService;
     private final BookingService bookingService;
     private final CommentRepository commentRepository;
+    private final ItemRequestService itemRequestService;
 
     @Autowired
     public ItemService(ItemRepository itemRepository, UserService userService,
-                       @Lazy BookingService bookingService, CommentRepository commentRepository) {
+                       @Lazy BookingService bookingService, CommentRepository commentRepository, @Lazy ItemRequestService itemRequestService) {
         this.itemRepository = itemRepository;
         this.userService = userService;
         this.bookingService = bookingService;
         this.commentRepository = commentRepository;
+        this.itemRequestService = itemRequestService;
     }
 
     @Transactional
     public ItemDto createItem(Long userId, ItemDto itemDto) {
-        User user = UserMapper.toUser(userService.getUserById(userId));
+        UserDto userDto = userService.getUserById(userId);
+        User user = UserMapper.toUser(userDto);
         Item item = ItemMapper.toItem(itemDto);
         item.setOwner(user);
+        if (itemDto.getRequestId() != null) {
+            ItemRequest request = ItemRequestMapper.toItemRequest(itemRequestService.getRequest(itemDto.getRequestId()), userDto);
+            item.setRequest(request);
+        }
         return ItemMapper.toItemDto(itemRepository.save(item));
     }
 
@@ -152,5 +162,13 @@ public class ItemService {
         } else {
             throw new BadRequestException("User can't make comments");
         }
+    }
+
+    public List<ItemDto> getItemsByRequestId(Long id) {
+        return itemRepository.findByRequestId(id).stream().map(ItemMapper::toItemDto).toList();
+    }
+
+    public List<ItemDto> getItemsByRequests(List<ItemRequest> requests) {
+        return itemRepository.findAllByRequestIn(requests).stream().map(ItemMapper::toItemDto).toList();
     }
 }

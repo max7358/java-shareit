@@ -21,7 +21,7 @@ public class ItemRequest {
     @ManyToOne
     @JoinColumn(name = "requestor_id")
     private User requestor;
-    private ZonedDateTime created = ZonedDateTime.now();
+    private ZonedDateTime created;
 
     @Override
     public boolean equals(Object o) {

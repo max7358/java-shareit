@@ -15,9 +15,9 @@ public class ErrorHandler {
 
     @ExceptionHandler({MethodArgumentNotValidException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public List<String> handleArgumentNotValidException(final MethodArgumentNotValidException ex) {
-        return ex.getBindingResult().getFieldErrors().stream().map(fe -> "Validation error: " + fe.getDefaultMessage() +
-                " -> field: " + fe.getField()).toList();
+    public Map<String, List<String>> handleArgumentNotValidException(final MethodArgumentNotValidException ex) {
+        return Map.of("error", ex.getBindingResult().getFieldErrors().stream().map(fe -> "Validation error: " + fe.getDefaultMessage() +
+                " -> field: " + fe.getField()).toList());
     }
 
     @ExceptionHandler({ConstraintViolationException.class})
