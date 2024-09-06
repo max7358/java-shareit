@@ -32,4 +32,12 @@ public class UserClient extends BaseClient {
     public ResponseEntity<Object> updateUser(Long id, UserDto userDto) {
         return patch("/" + id, userDto);
     }
+
+    public ResponseEntity<Object> getUserById(Long id) {
+        return get("/" + id);
+    }
+
+    public ResponseEntity<Object> deleteUserById(Long id) {
+        return delete("/" + id);
+    }
 }

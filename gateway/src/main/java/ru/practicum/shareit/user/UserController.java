@@ -32,4 +32,16 @@ public class UserController {
         log.info("Updating user: {}", userDto);
         return userClient.updateUser(id, userDto);
     }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Object> getUser(@PathVariable Long id) {
+        log.info("Retrieving user with id: {}", id);
+        return userClient.getUserById(id);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Object> deleteUser(@PathVariable Long id) {
+        log.info("Deleting user with id: {}", id);
+        return userClient.deleteUserById(id);
+    }
 }

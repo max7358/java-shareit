@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.item.dto.CommentSaveDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 
+import java.util.List;
+
 @Controller
 @RequestMapping(path = "/items")
 @RequiredArgsConstructor
@@ -29,5 +31,31 @@ public class ItemController {
                                  @PathVariable Long itemId, @Valid @RequestBody CommentSaveDto commentDto) {
         log.info("Adding comment: {}, userId={}", commentDto, userId);
         return itemClient.addComment(userId, itemId, commentDto);
+    }
+
+    @PatchMapping("/{itemId}")
+    public ResponseEntity<Object> updateItem(@RequestHeader("X-Sharer-User-Id") Long userId, @PathVariable Long itemId,
+                              @RequestBody ItemDto itemDto) {
+        log.info("Updating item: {}", itemDto);
+        return itemClient.updateItem(userId, itemId, itemDto);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Object> getItem(@RequestHeader(value = "X-Sharer-User-Id", required = false) Long userId, @PathVariable Long id) {
+        log.info("Retrieving item: {}", id);
+        return itemClient.getItem(id, userId);
+    }
+
+    @GetMapping
+    public ResponseEntity<Object> getItems(@RequestHeader("X-Sharer-User-Id") Long userId) {
+        log.info("Retrieving items");
+        return itemClient.getItems(userId);
+
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<Object> searchItems(@RequestParam("text") String text) {
+        log.info("Retrieving items with text {}", text);
+        return itemClient.findItems(text);
     }
 }
