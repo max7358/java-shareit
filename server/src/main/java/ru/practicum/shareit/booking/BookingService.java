@@ -88,53 +88,39 @@ public class BookingService {
 
     public List<BookingDto> getBookings(Long userId, Optional<BookingState> bState) {
         BookingState state = bState.orElse(BookingState.ALL);
-        switch (state) {
-            case ALL:
-                return repository.findByBooker_IdOrderByStartDesc(userId).stream().map(BookingMapper::toBookingDto).toList();
-            case CURRENT:
-                return repository.findByBooker_IdAndStatusOrderByStartDesc(userId, BookingStatus.APPROVED)
-                        .stream().map(BookingMapper::toBookingDto).toList();
-            case PAST:
-                return repository.findByBooker_IdAndEndIsBeforeOrderByStartDesc(userId, LocalDateTime.now())
-                        .stream().map(BookingMapper::toBookingDto).toList();
-            case FUTURE:
-                return repository.findByBooker_IdAndStartIsAfterOrderByStartDesc(userId, LocalDateTime.now())
-                        .stream().map(BookingMapper::toBookingDto).toList();
-            case WAITING:
-                return repository.findByBooker_IdAndStatusOrderByStartDesc(userId, BookingStatus.WAITING)
-                        .stream().map(BookingMapper::toBookingDto).toList();
-            case REJECTED:
-                return repository.findByBooker_IdAndStatusOrderByStartDesc(userId, BookingStatus.REJECTED)
-                        .stream().map(BookingMapper::toBookingDto).toList();
-            default:
-                throw new BadRequestException("Booking status: " + state + " unsupported!");
-        }
+        return switch (state) {
+            case ALL ->
+                    repository.findByBooker_IdOrderByStartDesc(userId).stream().map(BookingMapper::toBookingDto).toList();
+            case CURRENT -> repository.findByBooker_IdAndStatusOrderByStartDesc(userId, BookingStatus.APPROVED)
+                    .stream().map(BookingMapper::toBookingDto).toList();
+            case PAST -> repository.findByBooker_IdAndEndIsBeforeOrderByStartDesc(userId, LocalDateTime.now())
+                    .stream().map(BookingMapper::toBookingDto).toList();
+            case FUTURE -> repository.findByBooker_IdAndStartIsAfterOrderByStartDesc(userId, LocalDateTime.now())
+                    .stream().map(BookingMapper::toBookingDto).toList();
+            case WAITING -> repository.findByBooker_IdAndStatusOrderByStartDesc(userId, BookingStatus.WAITING)
+                    .stream().map(BookingMapper::toBookingDto).toList();
+            case REJECTED -> repository.findByBooker_IdAndStatusOrderByStartDesc(userId, BookingStatus.REJECTED)
+                    .stream().map(BookingMapper::toBookingDto).toList();
+        };
     }
 
     public List<BookingDto> getBookingsByOwner(Long userId, Optional<BookingState> bState) {
         BookingState state = bState.orElse(BookingState.ALL);
         User user = UserMapper.toUser(userService.getUserById(userId));
-        switch (state) {
-            case ALL:
-                return repository.findBookingsByItemOwnerOrderByStartDesc(user).stream().map(BookingMapper::toBookingDto).toList();
-            case CURRENT:
-                return repository.findBookingsByItemOwnerAndStatusOrderByStartDesc(user, BookingStatus.APPROVED)
-                        .stream().map(BookingMapper::toBookingDto).toList();
-            case PAST:
-                return repository.findBookingsByItemOwnerAndEndIsBeforeOrderByStartDesc(user, LocalDateTime.now())
-                        .stream().map(BookingMapper::toBookingDto).toList();
-            case FUTURE:
-                return repository.findBookingsByItemOwnerAndStartIsAfterOrderByStartDesc(user, LocalDateTime.now())
-                        .stream().map(BookingMapper::toBookingDto).toList();
-            case WAITING:
-                return repository.findBookingsByItemOwnerAndStatusOrderByStartDesc(user, BookingStatus.WAITING)
-                        .stream().map(BookingMapper::toBookingDto).toList();
-            case REJECTED:
-                return repository.findBookingsByItemOwnerAndStatusOrderByStartDesc(user, BookingStatus.REJECTED)
-                        .stream().map(BookingMapper::toBookingDto).toList();
-            default:
-                throw new BadRequestException("Booking status: " + state + " unsupported!");
-        }
+        return switch (state) {
+            case ALL ->
+                    repository.findBookingsByItemOwnerOrderByStartDesc(user).stream().map(BookingMapper::toBookingDto).toList();
+            case CURRENT -> repository.findBookingsByItemOwnerAndStatusOrderByStartDesc(user, BookingStatus.APPROVED)
+                    .stream().map(BookingMapper::toBookingDto).toList();
+            case PAST -> repository.findBookingsByItemOwnerAndEndIsBeforeOrderByStartDesc(user, LocalDateTime.now())
+                    .stream().map(BookingMapper::toBookingDto).toList();
+            case FUTURE -> repository.findBookingsByItemOwnerAndStartIsAfterOrderByStartDesc(user, LocalDateTime.now())
+                    .stream().map(BookingMapper::toBookingDto).toList();
+            case WAITING -> repository.findBookingsByItemOwnerAndStatusOrderByStartDesc(user, BookingStatus.WAITING)
+                    .stream().map(BookingMapper::toBookingDto).toList();
+            case REJECTED -> repository.findBookingsByItemOwnerAndStatusOrderByStartDesc(user, BookingStatus.REJECTED)
+                    .stream().map(BookingMapper::toBookingDto).toList();
+        };
     }
 
     public List<BookingDto> getBookingsByUserAndItem(Long userId, Long itemId) {
