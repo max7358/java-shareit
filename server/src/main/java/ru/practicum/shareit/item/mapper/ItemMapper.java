@@ -14,14 +14,15 @@ public class ItemMapper {
                 item.getName(),
                 item.getDescription(),
                 item.getAvailable(),
-                item.getRequest() != null ? item.getRequest().getId() : null
+                item.getRequest() != null ? item.getRequest().getId() : null,
+                item.getOwner() != null ? item.getOwner().getId() : null
         );
     }
 
     public static ItemAllDto toItemAllDto(Item item, BookingDto lastBooking, BookingDto nextBooking, List<CommentDto> commentsDto) {
         return new ItemAllDto(item.getId(), item.getName(), item.getDescription(), item.getAvailable(),
                 item.getRequest() != null ? item.getRequest().getId() : null,
-                lastBooking, nextBooking, commentsDto);
+                item.getOwner().getId(), lastBooking, nextBooking, commentsDto);
     }
 
     public static Item toItem(ItemDto itemDto) {
