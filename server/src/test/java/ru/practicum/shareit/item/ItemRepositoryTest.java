@@ -9,7 +9,7 @@ import ru.practicum.shareit.item.storage.ItemRepository;
 import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.user.model.User;
 
-import java.time.ZonedDateTime;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -39,7 +39,7 @@ class ItemRepositoryTest {
     @Test
     void findByRequestId(){
         User user = new User(null, "mail@du.tu", "name");
-        ItemRequest request = new ItemRequest(null, "description", user, ZonedDateTime.now());
+        ItemRequest request = new ItemRequest(null, "description", user, LocalDateTime.now());
         Item item = new Item(null, "item", "item descr", true, user, request);
         em.persist(user);
         em.persist(request);
@@ -54,7 +54,7 @@ class ItemRepositoryTest {
     @Test
     void findAllByRequestIn(){
         User user = new User(null, "mail@du.tu", "name");
-        ItemRequest request = new ItemRequest(null, "description", user, ZonedDateTime.now());
+        ItemRequest request = new ItemRequest(null, "description", user, LocalDateTime.now());
         Item item = new Item(null, "item", "item descr", true, user, request);
         em.persist(user);
         em.persist(request);

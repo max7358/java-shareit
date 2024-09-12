@@ -13,7 +13,7 @@ import ru.practicum.shareit.request.storage.ItemRequestRepository;
 import ru.practicum.shareit.user.UserService;
 import ru.practicum.shareit.user.dto.UserDto;
 
-import java.time.ZonedDateTime;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -34,7 +34,7 @@ public class ItemRequestService {
     @Transactional
     public ItemRequestDto createRequest(ItemRequestDto itemRequestDto, Long userId) {
         UserDto userDto = userService.getUserById(userId);
-        itemRequestDto.setCreated(ZonedDateTime.now());
+        itemRequestDto.setCreated(LocalDateTime.now());
         ItemRequest request = repository.save(ItemRequestMapper.toItemRequest(itemRequestDto, userDto));
         return ItemRequestMapper.toItemRequestDto(request);
     }

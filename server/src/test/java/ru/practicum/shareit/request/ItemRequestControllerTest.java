@@ -13,7 +13,7 @@ import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.request.dto.ItemRequestDto;
 
 import java.nio.charset.StandardCharsets;
-import java.time.ZonedDateTime;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.hamcrest.Matchers.is;
@@ -43,7 +43,7 @@ class ItemRequestControllerTest {
     void setUp() {
         ItemDto itemDto = new ItemDto(1L, "name", "description",
                 true, null, 1L);
-        itemRequestDto = new ItemRequestDto(1L, "description",1L, ZonedDateTime.now(), List.of(itemDto));
+        itemRequestDto = new ItemRequestDto(1L, "description",1L, LocalDateTime.now(), List.of(itemDto));
     }
 
     @Test

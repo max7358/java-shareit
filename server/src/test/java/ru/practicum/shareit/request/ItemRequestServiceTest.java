@@ -12,7 +12,7 @@ import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.user.UserService;
 import ru.practicum.shareit.user.dto.UserDto;
 
-import java.time.ZonedDateTime;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -36,7 +36,7 @@ class ItemRequestServiceTest {
     @BeforeEach
     void setUp() {
         userDto = userService.createUser(new UserDto(null, "mail@du.tu", "name"));
-        requestDto = new ItemRequestDto(null, "description", null, ZonedDateTime.now(), List.of());
+        requestDto = new ItemRequestDto(null, "description", null, LocalDateTime.now(), List.of());
     }
 
     @Test
