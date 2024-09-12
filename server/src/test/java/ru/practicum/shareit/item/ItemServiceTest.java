@@ -104,7 +104,7 @@ class ItemServiceTest {
 
         List<ItemDto> itemS = service.findItems(itemDto.getDescription().replaceFirst(".$", ""));
         assertThat(itemS.size(), equalTo(1));
-        assertThat(itemS.get(0).getId(), equalTo(id));
+        assertThat(itemS.getFirst().getId(), equalTo(id));
     }
 
     @Test

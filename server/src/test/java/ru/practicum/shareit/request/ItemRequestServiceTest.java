@@ -7,8 +7,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
-import ru.practicum.shareit.booking.BookingService;
-import ru.practicum.shareit.item.ItemService;
 import ru.practicum.shareit.request.dto.ItemRequestDto;
 import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.user.UserService;
@@ -31,12 +29,6 @@ class ItemRequestServiceTest {
 
     @Autowired
     private UserService userService;
-
-    @Autowired
-    private ItemService itemService;
-
-    @Autowired
-    private BookingService bookingService;
 
     private ItemRequestDto requestDto;
     private UserDto userDto;
