@@ -10,6 +10,8 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.BookingService;
 import ru.practicum.shareit.booking.dto.BookingDto;
+import ru.practicum.shareit.exception.BadRequestException;
+import ru.practicum.shareit.exception.ForbiddenException;
 import ru.practicum.shareit.item.dto.CommentSaveDto;
 import ru.practicum.shareit.item.dto.ItemAllDto;
 import ru.practicum.shareit.item.dto.ItemDto;
@@ -22,6 +24,7 @@ import java.util.List;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
 
@@ -108,8 +111,16 @@ class ItemServiceTest {
     }
 
     @Test
-    void addComment(){
-        when(bookingService.getBookingsByUserAndItem(anyLong(),anyLong())).thenReturn(List.of(new BookingDto()));
+    void findItemsEmpty() {
+        Long id = service.createItem(userDto.getId(), itemDto).getId();
+
+        List<ItemDto> itemS = service.findItems("");
+        assertThat(itemS.size(), equalTo(0));
+    }
+
+    @Test
+    void addComment() {
+        when(bookingService.getBookingsByUserAndItem(anyLong(), anyLong())).thenReturn(List.of(new BookingDto()));
 
         Long id = service.createItem(userDto.getId(), itemDto).getId();
         CommentSaveDto commentSaveDto = new CommentSaveDto("comment text");
@@ -119,5 +130,14 @@ class ItemServiceTest {
         assertThat(itemS.getId(), equalTo(id));
         assertThat(itemS.getComments().getFirst().getItemId(), equalTo(id));
         assertThat(itemS.getComments().getFirst().getText(), equalTo(commentSaveDto.getText()));
+    }
+
+    @Test
+    void addCommentException() {
+        when(bookingService.getBookingsByUserAndItem(anyLong(), anyLong())).thenReturn(List.of());
+
+        Long id = service.createItem(userDto.getId(), itemDto).getId();
+        CommentSaveDto commentSaveDto = new CommentSaveDto("comment text");
+        assertThrows(BadRequestException.class, () -> service.addComment(itemDto.getOwnerId(), id, commentSaveDto));
     }
 }
