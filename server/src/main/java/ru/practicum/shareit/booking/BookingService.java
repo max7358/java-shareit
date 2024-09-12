@@ -53,7 +53,7 @@ public class BookingService {
         }
         Booking booking = BookingMapper.toBooking(bookingSaveDto);
         booking.setBooker(UserMapper.toUser(userDto));
-        booking.setItem(ItemMapper.toItem(itemDto));
+        booking.setItem(ItemMapper.toItem(itemDto, userDto));
         booking.setStatus(BookingStatus.WAITING);
         return BookingMapper.toBookingDto(repository.save(booking));
     }

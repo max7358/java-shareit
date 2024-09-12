@@ -57,7 +57,7 @@ public class ItemService {
     public ItemDto createItem(Long userId, ItemDto itemDto) {
         UserDto userDto = userService.getUserById(userId);
         User user = UserMapper.toUser(userDto);
-        Item item = ItemMapper.toItem(itemDto);
+        Item item = ItemMapper.toItem(itemDto, userDto);
         item.setOwner(user);
         if (itemDto.getRequestId() != null) {
             ItemRequest request = ItemRequestMapper.toItemRequest(itemRequestService.getRequest(itemDto.getRequestId()), userDto);

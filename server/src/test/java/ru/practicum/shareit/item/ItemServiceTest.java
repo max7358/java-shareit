@@ -6,15 +6,24 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.shareit.booking.BookingService;
+import ru.practicum.shareit.booking.dto.BookingDto;
+import ru.practicum.shareit.item.dto.CommentSaveDto;
+import ru.practicum.shareit.item.dto.ItemAllDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.UserService;
 import ru.practicum.shareit.user.dto.UserDto;
 
+import java.util.List;
+
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.when;
 
 @Transactional
 @SpringBootTest
@@ -29,6 +38,9 @@ class ItemServiceTest {
     @Autowired
     private UserService userService;
 
+    @MockBean
+    private BookingService bookingService;
+
     private UserDto userDto;
     private ItemDto itemDto;
 
@@ -41,15 +53,71 @@ class ItemServiceTest {
     @Test
     void createItem() {
         service.createItem(userDto.getId(), itemDto);
+
         TypedQuery<Item> query = em.createQuery("select item from Item item where item.name = :name", Item.class);
         Item item = query.setParameter("name", itemDto.getName()).getSingleResult();
         assertThat(item.getId(), notNullValue());
+        assertThat(item.getName(), equalTo(itemDto.getName()));
+        assertThat(item.getDescription(), equalTo(itemDto.getDescription()));
+        assertThat(item.getOwner().getId(), equalTo(itemDto.getOwnerId()));
+        assertThat(item.getAvailable(), equalTo(itemDto.getAvailable()));
     }
 
     @Test
     void getItem() {
-        ItemDto itemDtoT = service.createItem(userDto.getId(), itemDto);
-        ItemDto itemS = service.getItem(itemDtoT.getId(), userDto.getId());
-        assertThat(itemS.getId(), equalTo(itemDtoT.getId()));
+        Long id = service.createItem(userDto.getId(), itemDto).getId();
+
+        ItemDto itemS = service.getItem(id, userDto.getId());
+        assertThat(itemS.getId(), equalTo(id));
+        assertThat(itemS.getName(), equalTo(itemDto.getName()));
+        assertThat(itemS.getDescription(), equalTo(itemDto.getDescription()));
+        assertThat(itemS.getOwnerId(), equalTo(itemDto.getOwnerId()));
+        assertThat(itemS.getAvailable(), equalTo(itemDto.getAvailable()));
+    }
+
+    @Test
+    void updateItem() {
+        Long id = service.createItem(userDto.getId(), itemDto).getId();
+        ItemDto itemUpdateDto = ItemDto.builder().name("New Name").build();
+        service.updateItem(itemDto.getOwnerId(), id, itemUpdateDto);
+
+        ItemDto itemS = service.getItem(id, userDto.getId());
+        assertThat(itemS.getId(), equalTo(id));
+        assertThat(itemS.getName(), equalTo(itemUpdateDto.getName()));
+        assertThat(itemS.getDescription(), equalTo(itemDto.getDescription()));
+        assertThat(itemS.getOwnerId(), equalTo(itemDto.getOwnerId()));
+        assertThat(itemS.getAvailable(), equalTo(itemDto.getAvailable()));
+    }
+
+    @Test
+    void getItems() {
+        Long id = service.createItem(userDto.getId(), itemDto).getId();
+
+        List<ItemAllDto> itemS = service.getItems(id);
+        assertThat(itemS.size(), equalTo(1));
+        assertThat(itemS.getFirst().getId(), equalTo(id));
+    }
+
+    @Test
+    void findItems() {
+        Long id = service.createItem(userDto.getId(), itemDto).getId();
+
+        List<ItemDto> itemS = service.findItems(itemDto.getDescription().replaceFirst(".$", ""));
+        assertThat(itemS.size(), equalTo(1));
+        assertThat(itemS.get(0).getId(), equalTo(id));
+    }
+
+    @Test
+    void addComment(){
+        when(bookingService.getBookingsByUserAndItem(anyLong(),anyLong())).thenReturn(List.of(new BookingDto()));
+
+        Long id = service.createItem(userDto.getId(), itemDto).getId();
+        CommentSaveDto commentSaveDto = new CommentSaveDto("comment text");
+        service.addComment(itemDto.getOwnerId(), id, commentSaveDto);
+
+        ItemAllDto itemS = service.getItem(id, userDto.getId());
+        assertThat(itemS.getId(), equalTo(id));
+        assertThat(itemS.getComments().getFirst().getItemId(), equalTo(id));
+        assertThat(itemS.getComments().getFirst().getText(), equalTo(commentSaveDto.getText()));
     }
 }

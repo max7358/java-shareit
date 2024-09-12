@@ -15,13 +15,8 @@ public class CommentMapper {
                 comment.getAuthor().getName(), comment.getCreated());
     }
 
-    public static Comment toComment(CommentDto commentDto, UserDto userDto, ItemDto itemDto) {
-        return new Comment(commentDto.getId(), commentDto.getText(), ItemMapper.toItem(itemDto), UserMapper.toUser(userDto),
-                commentDto.getCreated());
-    }
-
     public static Comment toComment(CommentSaveDto commentDto, UserDto userDto, ItemDto itemDto) {
-        return new Comment(null, commentDto.getText(), ItemMapper.toItem(itemDto), UserMapper.toUser(userDto),
+        return new Comment(null, commentDto.getText(), ItemMapper.toItem(itemDto, userDto), UserMapper.toUser(userDto),
                 LocalDateTime.now());
     }
 }
