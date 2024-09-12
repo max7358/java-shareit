@@ -93,7 +93,7 @@ class ItemServiceTest {
     void getItems() {
         Long id = service.createItem(userDto.getId(), itemDto).getId();
 
-        List<ItemAllDto> itemS = service.getItems(id);
+        List<ItemAllDto> itemS = service.getItems(userDto.getId());
         assertThat(itemS.size(), equalTo(1));
         assertThat(itemS.getFirst().getId(), equalTo(id));
     }

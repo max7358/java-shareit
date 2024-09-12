@@ -48,6 +48,7 @@ class ItemRequestServiceTest {
         assertThat(request.getId(), equalTo(id));
         assertThat(request.getDescription(), equalTo(requestDto.getDescription()));
         assertThat(request.getRequestor().getId(), equalTo(userDto.getId()));
+        assertThat(request.getRequestor().getId(), equalTo(userDto.getId()));
     }
 
     @Test

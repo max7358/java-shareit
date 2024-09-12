@@ -9,8 +9,11 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingSaveDto;
+import ru.practicum.shareit.booking.enm.BookingState;
 import ru.practicum.shareit.booking.enm.BookingStatus;
 import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.exception.BadRequestException;
+import ru.practicum.shareit.exception.ForbiddenException;
 import ru.practicum.shareit.item.ItemService;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.user.UserService;
@@ -18,9 +21,11 @@ import ru.practicum.shareit.user.dto.UserDto;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @Transactional
 @SpringBootTest
@@ -39,12 +44,13 @@ class BookingServiceTest {
 
     private BookingSaveDto bookingSaveDto;
     private UserDto userDto;
+    private ItemDto itemDto;
 
 
     @BeforeEach
     void setUp() {
         userDto = userService.createUser(new UserDto(null, "mail@du.tu", "name"));
-        ItemDto itemDto = itemService.createItem(userDto.getId(), new ItemDto(null, "item", "item descr",
+        itemDto = itemService.createItem(userDto.getId(), new ItemDto(null, "item", "item descr",
                 true, null, userDto.getId()));
         bookingSaveDto = new BookingSaveDto(null, LocalDateTime.now().plusMinutes(1), LocalDateTime.now().plusMinutes(10),
                 itemDto.getId());
@@ -63,6 +69,25 @@ class BookingServiceTest {
     }
 
     @Test
+    void createBookingExceptionStart() {
+        bookingSaveDto.setEnd(LocalDateTime.now().minusMinutes(10));
+        assertThrows(BadRequestException.class, () -> service.createBooking(userDto.getId(), bookingSaveDto));
+    }
+
+    @Test
+    void createBookingExceptionEqual() {
+        bookingSaveDto.setStart(LocalDateTime.now());
+        bookingSaveDto.setEnd(LocalDateTime.now());
+        assertThrows(BadRequestException.class, () -> service.createBooking(userDto.getId(), bookingSaveDto));
+    }
+
+    @Test
+    void createBookingExceptionItem() {
+        itemService.updateItem(userDto.getId(), itemDto.getId(), ItemDto.builder().available(false).build());
+        assertThrows(BadRequestException.class, () -> service.createBooking(userDto.getId(), bookingSaveDto));
+    }
+
+    @Test
     void getBooking() {
         Long id = service.createBooking(userDto.getId(), bookingSaveDto).getId();
 
@@ -71,6 +96,13 @@ class BookingServiceTest {
         assertThat(bookingDtoS.getItem().getId(), equalTo(bookingSaveDto.getItemId()));
         assertThat(bookingDtoS.getBooker().getId(), equalTo(userDto.getId()));
         assertThat(bookingDtoS.getStatus(), equalTo(BookingStatus.WAITING));
+    }
+
+    @Test
+    void getBookingException() {
+        Long id = service.createBooking(userDto.getId(), bookingSaveDto).getId();
+
+        assertThrows(ForbiddenException.class, () -> service.getBooking(99L, id));
     }
 
     @Test
@@ -86,6 +118,12 @@ class BookingServiceTest {
     }
 
     @Test
+    void approveBookingException() {
+        Long id = service.createBooking(userDto.getId(), bookingSaveDto).getId();
+        assertThrows(ForbiddenException.class, () -> service.approveBooking(99L, id, true));
+    }
+
+    @Test
     void getBookings() {
         Long id = service.createBooking(userDto.getId(), bookingSaveDto).getId();
 
@@ -98,10 +136,115 @@ class BookingServiceTest {
     }
 
     @Test
+    void getBookingsByStateWaiting() {
+        Long id = service.createBooking(userDto.getId(), bookingSaveDto).getId();
+
+        List<BookingDto> bookingDtoS = service.getBookings(userDto.getId(), Optional.of(BookingState.WAITING));
+        assertThat(bookingDtoS.size(), equalTo(1));
+        assertThat(bookingDtoS.getFirst().getId(), equalTo(id));
+        assertThat(bookingDtoS.getFirst().getItem().getId(), equalTo(bookingSaveDto.getItemId()));
+        assertThat(bookingDtoS.getFirst().getBooker().getId(), equalTo(userDto.getId()));
+        assertThat(bookingDtoS.getFirst().getStatus(), equalTo(BookingStatus.WAITING));
+    }
+
+    @Test
+    void getBookingsByStateRejected() {
+        Long id = service.createBooking(userDto.getId(), bookingSaveDto).getId();
+        service.approveBooking(userDto.getId(), id, false);
+
+        List<BookingDto> bookingDtoS = service.getBookings(userDto.getId(), Optional.of(BookingState.REJECTED));
+        assertThat(bookingDtoS.size(), equalTo(1));
+        assertThat(bookingDtoS.getFirst().getId(), equalTo(id));
+        assertThat(bookingDtoS.getFirst().getItem().getId(), equalTo(bookingSaveDto.getItemId()));
+        assertThat(bookingDtoS.getFirst().getBooker().getId(), equalTo(userDto.getId()));
+        assertThat(bookingDtoS.getFirst().getStatus(), equalTo(BookingStatus.REJECTED));
+    }
+
+    @Test
+    void getBookingsByStateFuture() {
+        bookingSaveDto.setStart(LocalDateTime.now().plusMinutes(1));
+        Long id = service.createBooking(userDto.getId(), bookingSaveDto).getId();
+
+        List<BookingDto> bookingDtoS = service.getBookings(userDto.getId(), Optional.of(BookingState.FUTURE));
+        assertThat(bookingDtoS.size(), equalTo(1));
+        assertThat(bookingDtoS.getFirst().getId(), equalTo(id));
+        assertThat(bookingDtoS.getFirst().getItem().getId(), equalTo(bookingSaveDto.getItemId()));
+        assertThat(bookingDtoS.getFirst().getBooker().getId(), equalTo(userDto.getId()));
+        assertThat(bookingDtoS.getFirst().getStatus(), equalTo(BookingStatus.WAITING));
+    }
+
+    @Test
+    void getBookingsByStatePast() {
+        bookingSaveDto.setStart(LocalDateTime.now().minusMinutes(10));
+        bookingSaveDto.setEnd(LocalDateTime.now().minusMinutes(5));
+        Long id = service.createBooking(userDto.getId(), bookingSaveDto).getId();
+
+        List<BookingDto> bookingDtoS = service.getBookings(userDto.getId(), Optional.of(BookingState.PAST));
+        assertThat(bookingDtoS.size(), equalTo(1));
+        assertThat(bookingDtoS.getFirst().getId(), equalTo(id));
+        assertThat(bookingDtoS.getFirst().getItem().getId(), equalTo(bookingSaveDto.getItemId()));
+        assertThat(bookingDtoS.getFirst().getBooker().getId(), equalTo(userDto.getId()));
+        assertThat(bookingDtoS.getFirst().getStatus(), equalTo(BookingStatus.WAITING));
+    }
+
+    @Test
     void getBookingsByOwner() {
         Long id = service.createBooking(userDto.getId(), bookingSaveDto).getId();
 
         List<BookingDto> bookingDtoS = service.getBookingsByOwner(userDto.getId(), java.util.Optional.empty());
+        assertThat(bookingDtoS.size(), equalTo(1));
+        assertThat(bookingDtoS.getFirst().getId(), equalTo(id));
+        assertThat(bookingDtoS.getFirst().getItem().getId(), equalTo(bookingSaveDto.getItemId()));
+        assertThat(bookingDtoS.getFirst().getBooker().getId(), equalTo(userDto.getId()));
+        assertThat(bookingDtoS.getFirst().getStatus(), equalTo(BookingStatus.WAITING));
+    }
+
+    @Test
+    void getBookingsByOwnerCurrent() {
+        Long id = service.createBooking(userDto.getId(), bookingSaveDto).getId();
+        service.approveBooking(userDto.getId(), id, true);
+
+        List<BookingDto> bookingDtoS = service.getBookingsByOwner(userDto.getId(), Optional.of(BookingState.CURRENT));
+        assertThat(bookingDtoS.size(), equalTo(1));
+        assertThat(bookingDtoS.getFirst().getId(), equalTo(id));
+        assertThat(bookingDtoS.getFirst().getItem().getId(), equalTo(bookingSaveDto.getItemId()));
+        assertThat(bookingDtoS.getFirst().getBooker().getId(), equalTo(userDto.getId()));
+        assertThat(bookingDtoS.getFirst().getStatus(), equalTo(BookingStatus.APPROVED));
+    }
+
+    @Test
+    void getBookingsByOwnerRejected() {
+        Long id = service.createBooking(userDto.getId(), bookingSaveDto).getId();
+        service.approveBooking(userDto.getId(), id, false);
+
+        List<BookingDto> bookingDtoS = service.getBookingsByOwner(userDto.getId(), Optional.of(BookingState.REJECTED));
+        assertThat(bookingDtoS.size(), equalTo(1));
+        assertThat(bookingDtoS.getFirst().getId(), equalTo(id));
+        assertThat(bookingDtoS.getFirst().getItem().getId(), equalTo(bookingSaveDto.getItemId()));
+        assertThat(bookingDtoS.getFirst().getBooker().getId(), equalTo(userDto.getId()));
+        assertThat(bookingDtoS.getFirst().getStatus(), equalTo(BookingStatus.REJECTED));
+    }
+
+    @Test
+    void getBookingsByOwnerFuture() {
+        bookingSaveDto.setStart(LocalDateTime.now().plusMinutes(1));
+        Long id = service.createBooking(userDto.getId(), bookingSaveDto).getId();
+
+        List<BookingDto> bookingDtoS = service.getBookingsByOwner(userDto.getId(), Optional.of(BookingState.FUTURE));
+        assertThat(bookingDtoS.size(), equalTo(1));
+        assertThat(bookingDtoS.getFirst().getId(), equalTo(id));
+        assertThat(bookingDtoS.getFirst().getItem().getId(), equalTo(bookingSaveDto.getItemId()));
+        assertThat(bookingDtoS.getFirst().getBooker().getId(), equalTo(userDto.getId()));
+        assertThat(bookingDtoS.getFirst().getStatus(), equalTo(BookingStatus.WAITING));
+    }
+
+    @Test
+    void getBookingsByOwnerPast() {
+        bookingSaveDto.setStart(LocalDateTime.now().minusMinutes(10));
+        bookingSaveDto.setEnd(LocalDateTime.now().minusMinutes(5));
+        Long id = service.createBooking(userDto.getId(), bookingSaveDto).getId();
+
+        List<BookingDto> bookingDtoS = service.getBookingsByOwner(userDto.getId(), Optional.of(BookingState.PAST));
         assertThat(bookingDtoS.size(), equalTo(1));
         assertThat(bookingDtoS.getFirst().getId(), equalTo(id));
         assertThat(bookingDtoS.getFirst().getItem().getId(), equalTo(bookingSaveDto.getItemId()));

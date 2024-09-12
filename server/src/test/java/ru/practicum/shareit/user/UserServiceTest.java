@@ -58,12 +58,12 @@ class UserServiceTest {
     @Test
     void updateUser() {
         Long id = service.createUser(userDto).getId();
-        UserDto userDtoUpdated = new UserDto(null, "update@mail.it", null);
+        UserDto userDtoUpdated = new UserDto(null, "update@mail.it", "update");
         service.updateUser(id, userDtoUpdated);
         UserDto userById = service.getUserById(id);
 
         assertThat(userById.getId(), equalTo(id));
-        assertThat(userById.getName(), equalTo(userDto.getName()));
+        assertThat(userById.getName(), equalTo(userDtoUpdated.getName()));
         assertThat(userById.getEmail(), equalTo(userDtoUpdated.getEmail()));
     }
 

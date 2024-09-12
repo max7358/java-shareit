@@ -10,6 +10,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.enm.BookingStatus;
+import ru.practicum.shareit.exception.ForbiddenException;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.user.dto.UserDto;
@@ -122,6 +123,14 @@ class BookingControllerTest {
                 .thenThrow(new NotFoundException("Booking not found"));
         mvc.perform(get("/bookings/{id}", 1L).header(header, 1))
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void getBookingForbiddenException() throws Exception {
+        when(bookingService.getBooking(anyLong(), anyLong()))
+                .thenThrow(new ForbiddenException("Not authorized"));
+        mvc.perform(get("/bookings/{id}", 1L).header(header, 1))
+                .andExpect(status().isForbidden());
     }
 
 }
