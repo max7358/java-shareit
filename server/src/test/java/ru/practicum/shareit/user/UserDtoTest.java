@@ -19,7 +19,7 @@ class UserDtoTest {
 
     @Test
     void testSerialize() throws IOException {
-        UserDto userDto = new UserDto(1l, "email@mail.tu", "name");
+        UserDto userDto = new UserDto(1L, "email@mail.tu", "name");
         JsonContent<UserDto> jsonContent = json.write(userDto);
         assertThat(jsonContent).hasJsonPathValue("$.email", userDto.getEmail());
     }

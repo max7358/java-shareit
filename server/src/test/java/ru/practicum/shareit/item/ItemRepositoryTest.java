@@ -37,7 +37,7 @@ class ItemRepositoryTest {
     }
 
     @Test
-    void findByRequestId(){
+    void findByRequestId() {
         User user = new User(null, "mail@du.tu", "name");
         ItemRequest request = new ItemRequest(null, "description", user, LocalDateTime.now());
         Item item = new Item(null, "item", "item descr", true, user, request);
@@ -52,7 +52,7 @@ class ItemRepositoryTest {
     }
 
     @Test
-    void findAllByRequestIn(){
+    void findAllByRequestIn() {
         User user = new User(null, "mail@du.tu", "name");
         ItemRequest request = new ItemRequest(null, "description", user, LocalDateTime.now());
         Item item = new Item(null, "item", "item descr", true, user, request);
