@@ -77,7 +77,7 @@ class BookingServiceTest {
     @Test
     void createBookingExceptionEqual() {
         bookingSaveDto.setStart(LocalDateTime.now());
-        bookingSaveDto.setEnd(LocalDateTime.now());
+        bookingSaveDto.setEnd(bookingSaveDto.getStart());
         assertThrows(BadRequestException.class, () -> service.createBooking(userDto.getId(), bookingSaveDto));
     }
 
