@@ -1,5 +1,6 @@
 package ru.practicum.shareit.client;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -105,8 +106,7 @@ public class BaseClient {
 
     private HttpHeaders defaultHeaders(Long userId) {
         HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.setAccept(List.of(MediaType.APPLICATION_JSON));
+        headers.setAccept(new ArrayList<>(List.of(MediaType.APPLICATION_JSON)));
         if (userId != null) {
             headers.set("X-Sharer-User-Id", String.valueOf(userId));
         }

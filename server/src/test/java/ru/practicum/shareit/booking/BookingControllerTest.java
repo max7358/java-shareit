@@ -10,6 +10,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.enm.BookingStatus;
+import ru.practicum.shareit.exception.BadRequestException;
 import ru.practicum.shareit.exception.ForbiddenException;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.dto.ItemDto;
@@ -131,6 +132,17 @@ class BookingControllerTest {
                 .thenThrow(new ForbiddenException("Not authorized"));
         mvc.perform(get("/bookings/{id}", 1L).header(header, 1))
                 .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void createBookingValidateException() throws Exception {
+        when(bookingService.createBooking(anyLong(), any()))
+                .thenThrow(new BadRequestException("Wrong dates"));
+        mvc.perform(post("/bookings").content(mapper.writeValueAsString(bookingDto)).header(header, 1)
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
     }
 
 }

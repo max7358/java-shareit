@@ -14,6 +14,7 @@ import ru.practicum.shareit.booking.enm.BookingStatus;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.exception.BadRequestException;
 import ru.practicum.shareit.exception.ForbiddenException;
+import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.ItemService;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.user.UserService;
@@ -99,10 +100,15 @@ class BookingServiceTest {
     }
 
     @Test
-    void getBookingException() {
+    void getBookingAuthException() {
         Long id = service.createBooking(userDto.getId(), bookingSaveDto).getId();
 
         assertThrows(ForbiddenException.class, () -> service.getBooking(99L, id));
+    }
+
+    @Test
+    void getBookingNotFoundException() {
+        assertThrows(NotFoundException.class, () -> service.getBooking(99L, 99L));
     }
 
     @Test
